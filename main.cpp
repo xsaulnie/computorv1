@@ -27,13 +27,14 @@ void solverorder1(std::map<int, float> &coef)
 
 void solverorder2(std::map<int, float> &coef)
 {
-    int delta;
+    float delta;
 
     if (coef.find(0) == coef.end())
         coef[0] = 0;
     if (coef.find(1) == coef.end())
         coef[1] = 0;
-    delta = (coef[1] * coef[1]) - 4 * coef[2] * coef[0];
+    delta = (coef[1] * coef[1]) - (4 * coef[2] * coef[0]);
+    //std::cout << "delta" << delta << std::endl;
 
     if (delta > 0 )
     {
@@ -43,14 +44,14 @@ void solverorder2(std::map<int, float> &coef)
     }
     else if (delta == 0)
     {
-        std::cout << "Discriminant is null, the double solution is:";
+        std::cout << "Discriminant is null, the double solution is:" << std::endl;
         std::cout << (-coef[1]) / (2 * coef[2]) << std::endl;
     }
     else
     {
-        std::cout << "Discriminant is stricly negative, the two conjugate complex solutions are:";
-        std::cout << (-coef[1]) / (2 * coef[2]) << " - " << sqrt(-delta) / (2 * coef[2]) << "* i"<< std::endl;
-        std::cout << (-coef[1]) / (2 * coef[2]) << " + " << sqrt(-delta) / (2 * coef[2]) << "* i"<< std::endl;
+        std::cout << "Discriminant is stricly negative, the two conjugate complex solutions are:" << std::endl;
+        std::cout << (-coef[1]) / (2 * coef[2]) << (coef[2] < 0 ? " + " : " - ") << abs(sqrt(-delta) / (2 * coef[2])) << "*i"<< std::endl;
+        std::cout << (-coef[1]) / (2 * coef[2]) << (coef[2] < 0 ? " - " : " + ") << abs(sqrt(-delta) / (2 * coef[2])) << "*i"<< std::endl;
     }
 }
 
@@ -101,9 +102,13 @@ void get_coef(std::map<int, float> &coef, std::string eq, char sig)
     float value;
 
     eq.erase(remove(eq.begin(), eq.end(), ' '), eq.end());
-    //std::cout << eq << std::endl;
 
-    index = eq[eq.find('*') + 3] - 48;
+    //std::string mess = std::string(eq.find('*'), eq.end());
+
+    //index = atoi((eq[eq.find('*') + 3]));
+    //std::cout << eq << std::endl;
+    //std::cout << eq.substr(eq.find('*') + 3, eq.size()) << std::endl;
+    index = atoi(eq.substr(eq.find('*') + 3, eq.size()).c_str());
     value = atof(eq.c_str());
 
     if (sig == '+')
@@ -132,14 +137,12 @@ void get_coefs(std::map<int, float> &coef, std::string equation, char sig)
     {
         if (*it == '+' || *it == '-')
         {
-            //std::cout << std::string(it_cur, it) << std::endl;
             get_coef(coef, std::string(it_cur, it), sig);
             it_cur = it;
         }
         it++;
     }
     get_coef(coef, std::string(it_cur, equation.end()), sig);
-    //std::cout << std::string(it_cur, equation.end())<< std::endl;
 }
 
 std::map<int, float> parcing(std::string equation)
