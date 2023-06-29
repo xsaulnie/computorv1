@@ -4,7 +4,96 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <cmath>
 
+void solverorder0(std::map<int, float> &coef)
+{
+    if (coef[0] == 0)
+        std::cout << "Any real number is a solution to this equation." << std::endl;
+    else
+        std::cout << "This equation has no solution."<< std::endl;
+}
+
+void solverorder1(std::map<int, float> &coef)
+{
+    std::cout << "The solution is:" << std::endl;
+    if (coef.find(0) == coef.end() || coef[0] == 0)
+    {
+        std::cout << "0" << std::endl;
+        return;
+    }
+    std::cout << - coef[0] / coef[1] << std::endl;
+}
+
+void solverorder2(std::map<int, float> &coef)
+{
+    int delta;
+
+    if (coef.find(0) == coef.end())
+        coef[0] = 0;
+    if (coef.find(1) == coef.end())
+        coef[1] = 0;
+    delta = (coef[1] * coef[1]) - 4 * coef[2] * coef[0];
+
+    if (delta > 0 )
+    {
+        std::cout << "Discriminant is strictly positive, the two solutions are:" << std::endl;
+        std::cout << (-coef[1] - sqrt(delta)) / (2 * coef[2]) << std::endl;
+        std::cout << (-coef[1] + sqrt(delta)) / (2 * coef[2]) << std::endl;
+    }
+    else if (delta == 0)
+    {
+        std::cout << "Discriminant is null, the double solution is:";
+        std::cout << (-coef[1]) / (2 * coef[2]) << std::endl;
+    }
+    else
+    {
+        std::cout << "Discriminant is stricly negative, the two conjugate complex solutions are:";
+        std::cout << (-coef[1]) / (2 * coef[2]) << " - " << sqrt(-delta) / (2 * coef[2]) << "* i"<< std::endl;
+        std::cout << (-coef[1]) / (2 * coef[2]) << " + " << sqrt(-delta) / (2 * coef[2]) << "* i"<< std::endl;
+    }
+}
+
+void solver(std::map<int, float> &coef)
+{
+    int deg = coef.rbegin()->first;
+
+    switch (deg)
+    {
+        case 0:
+            solverorder0(coef);
+            break;
+        case 1:
+            solverorder1(coef);
+            break;
+        case 2:
+            solverorder2(coef);
+            break;
+    }
+}
+
+bool print_order(std::map<int, float> &coef)
+{
+    int deg = coef.rbegin()->first; 
+    std::cout << "Polynomial degree: " << deg << std::endl;
+    if (deg >= 3)
+        return true;
+    return false;
+}
+
+void print_reduce(std::map<int, float>&coef)
+{
+    std::cout << "Reduced form: ";
+    std::map<int, float>::iterator it = coef.begin();
+    std::cout << it->second << " * X^" << it->first;
+    it++;
+    while(it != coef.end())
+    {
+        std::cout << (it->second < 0 ? " - " : " + ") << abs(it->second) << " * X^" << it->first;
+        it++;
+    }
+    std::cout << " = 0" << std::endl;
+}
 
 void get_coef(std::map<int, float> &coef, std::string eq, char sig)
 {
@@ -12,14 +101,17 @@ void get_coef(std::map<int, float> &coef, std::string eq, char sig)
     float value;
 
     eq.erase(remove(eq.begin(), eq.end(), ' '), eq.end());
-    std::cout << eq << std::endl;
+    //std::cout << eq << std::endl;
 
     index = eq[eq.find('*') + 3] - 48;
     value = atof(eq.c_str());
 
     if (sig == '+')
     {
-        coef[index] = value;
+        if (coef.find(index) == coef.end())
+            coef[index] = value;
+        else
+            coef[index] = coef[index] - value;
     }
     else
     {
@@ -29,8 +121,6 @@ void get_coef(std::map<int, float> &coef, std::string eq, char sig)
             coef[index] = coef[index] - value;
     }
 
-//   std::cout << eq[eq.find('*') + 3] - 48 << std::endl;
-//    std::cout << atof(eq.c_str()) << std::endl;
 }
 
 void get_coefs(std::map<int, float> &coef, std::string equation, char sig)
@@ -61,9 +151,6 @@ std::map<int, float> parcing(std::string equation)
 
     get_coefs(coef, equation.substr(0, equal), '+');
     get_coefs(coef, equation.substr(equal + 2), '-');
-    //std::cout << equation.substr(0, equal) << std::endl;
-    //std::cout << equation.substr(equal + 2) << std::endl;
-    //exit(0);
 
     return coef;
 }
@@ -79,14 +166,12 @@ int main(int argc, char *argv[])
     }
     coef = parcing(argv[1]);
 
-    // std::cout << coef[0] << std::endl;
-    // std::cout << coef[1] << std::endl;
-    // std::cout << coef[2] << std::endl;
-    std::map<int, float>::iterator it = coef.begin();
-    while (it != coef.end())
+    print_reduce(coef);
+    if (print_order(coef))
     {
-        std::cout << "Coef " << it->first << " Value " << it->second << std::endl;
-        it++;
+        std::cout << "The polynomial degree is strictly greater than 2, I can't solve." << std::endl;
+        exit(1);
     }
+    solver(coef);
     return 0;
 }
