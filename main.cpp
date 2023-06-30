@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <map>
+#include <vector>
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -116,7 +117,7 @@ void get_coef(std::map<int, float> &coef, std::string eq, char sig)
         if (coef.find(index) == coef.end())
             coef[index] = value;
         else
-            coef[index] = coef[index] - value;
+            coef[index] = coef[index] + value;
     }
     else
     {
@@ -158,6 +159,94 @@ std::map<int, float> parcing(std::string equation)
     return coef;
 }
 
+bool incorrect_car(char c)
+{
+    std::vector<char> cor{'=', '+', '-', 'X', '^', ' ', '*', '.'};
+    if (!isdigit(c) && std::find(cor.begin(), cor.end(), c ) == cor.end())
+    {
+        //std::cout << "c " << c << " first " << !isdigit(c) <<  " second " << (std::find(cor.begin(), cor.end(), c ) == cor.end()) << std::endl;
+        return true;
+    }
+    return false;
+}
+
+bool remove_space(std::string &eq)
+{
+    std::string::iterator it = eq.begin();
+    while (it != eq.end())
+    {
+        if (*it == 'X')
+        {
+            if (*(it + 1) != '^')
+                return true;
+            if (!isdigit(*(it + 2)))
+                return true;
+        }
+
+        if (*it == '.')
+        {
+            if (!isdigit(*(it + 1)))
+                return true;
+            if (it == eq.begin())
+                return true;
+            if (!isdigit(*(it - 1)))
+                return true;
+        }
+        it++;
+    }
+    eq.erase(remove(eq.begin(), eq.end(), ' '), eq.end());
+
+    it = eq.begin();
+    if (*it == '+' || *it == '=')
+        return true;
+    else if (*it == '-')
+        it++;
+    while (it != eq.end())
+    {
+        if (*it == '+' || *it == '-' || *it == '=')
+            {
+                if (!isdigit(*(it + 1)) || !isdigit(*(it - 1)))
+                    return true;
+                *it = '|';
+            }
+        it++;
+    }
+
+    // it = eq.begin();
+    // while (it != eq.end())
+    // {
+    //     if (*it == '+' || *it == '-' || *it == '=')
+    //     {
+    //         *it = '|';
+    //     }
+    // }
+    return false;
+}
+
+bool check_syntax(std::string eq)
+{
+    std::string::difference_type equal = std::count(eq.begin(), eq.end(), '=');
+
+    if (equal != 1)
+        return true;
+    
+    std::string::iterator it = eq.begin();
+
+    while (it != eq.end())
+    {
+        if (incorrect_car(*it))
+            return true;
+        it++;
+    }
+
+    if (remove_space(eq))
+        return true;
+
+    std::cout << "syntax" << eq << std::endl;
+
+    return false;
+}
+
 int main(int argc, char *argv[])
 {
     std::map<int, float> coef;
@@ -167,6 +256,13 @@ int main(int argc, char *argv[])
         std::cout << "Error : Wrong number of argument" << std::endl;
         exit(1);
     }
+
+    if (check_syntax(argv[1]))
+    {
+        std::cout << "Incorrect equation" << std::endl;
+        exit(1);
+    }
+
     coef = parcing(argv[1]);
 
     print_reduce(coef);
