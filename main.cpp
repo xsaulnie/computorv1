@@ -112,6 +112,9 @@ void get_coef(std::map<int, float> &coef, std::string eq, char sig)
     index = atoi(eq.substr(eq.find('*') + 3, eq.size()).c_str());
     value = atof(eq.c_str());
 
+    // std::cout << "index " << index << std::endl;
+    // std::cout << "value " << value << std::endl; 
+
     if (sig == '+')
     {
         if (coef.find(index) == coef.end())
@@ -134,6 +137,21 @@ void get_coefs(std::map<int, float> &coef, std::string equation, char sig)
     std::string::iterator it = equation.begin();
     std::string::iterator it_cur = equation.begin();
 
+    if (*it == '-')
+    {
+        it_cur = it;
+        it++;
+        while (*it != '+' && *it  != '-' && it != equation.end())
+            it++;
+        get_coef(coef, std::string(it_cur, it), sig);
+        it_cur = it;
+    }
+
+    if (it == equation.end())
+        return;
+    else
+        it++;
+
     while (it != equation.end())
     {
         if (*it == '+' || *it == '-')
@@ -151,6 +169,7 @@ std::map<int, float> parcing(std::string equation)
     std::map<int, float> coef;
     int equal;
 
+    equation.erase(remove(equation.begin(), equation.end(), ' '), equation.end());
     equal = equation.find("=");
 
     get_coefs(coef, equation.substr(0, equal), '+');
@@ -167,6 +186,19 @@ bool incorrect_car(char c)
         //std::cout << "c " << c << " first " << !isdigit(c) <<  " second " << (std::find(cor.begin(), cor.end(), c ) == cor.end()) << std::endl;
         return true;
     }
+    return false;
+}
+
+bool sign_after_equal(std::string &equation)
+{
+    unsigned long pos = equation.find('=');
+
+    if (pos == equation.length() - 1)
+        return true;
+
+    if (equation[pos + 1] == '-')
+        equation[pos + 1] = '0';
+    
     return false;
 }
 
@@ -196,30 +228,80 @@ bool remove_space(std::string &eq)
     }
     eq.erase(remove(eq.begin(), eq.end(), ' '), eq.end());
 
+    if (sign_after_equal(eq))
+        return true;
+
     it = eq.begin();
     if (*it == '+' || *it == '=')
         return true;
     else if (*it == '-')
+    {
+        *it = '0';
         it++;
+    }
     while (it != eq.end())
     {
         if (*it == '+' || *it == '-' || *it == '=')
             {
                 if (!isdigit(*(it + 1)) || !isdigit(*(it - 1)))
                     return true;
-                *it = '|';
             }
         it++;
     }
+    return false;
+}
 
-    // it = eq.begin();
-    // while (it != eq.end())
-    // {
-    //     if (*it == '+' || *it == '-' || *it == '=')
-    //     {
-    //         *it = '|';
-    //     }
-    // }
+bool pointdigit(std::string::iterator &it, bool flag)
+{
+    while (isdigit(*it))
+    {
+        it++;
+    }
+    if (*it == '.')
+    {
+        if (flag == false)
+            return true;
+        else
+            it++;
+        while (isdigit(*it))
+        {
+            it++;
+        }
+    }
+    return false;
+}
+
+bool check_monome(std::string eq)
+{
+    std::string::iterator it = eq.begin();
+
+    while (it != eq.end())
+    {
+        if (pointdigit(it, true))
+            return true;
+        if (it == eq.end() || *it != '*')
+            return true;
+        else
+            it++;
+        if (it == eq.end() || *it != 'X')
+            return true;
+        else
+            it++;
+        if (it == eq.end() || *it != '^')
+            return true;
+        else
+            it++;
+        if (pointdigit(it, false))
+            return true;
+        if (it == eq.end())
+            return false;
+        if (*it != '|')
+            return true;
+        else
+            it++;
+    }
+    if (*(it - 1) == '|')
+        return true;
     return false;
 }
 
@@ -242,7 +324,12 @@ bool check_syntax(std::string eq)
     if (remove_space(eq))
         return true;
 
-    std::cout << "syntax" << eq << std::endl;
+    std::cout << "syntax " << eq << std::endl;
+
+    // if (check_monome(eq))
+    // {
+    //     return true;
+    // }
 
     return false;
 }
@@ -264,6 +351,7 @@ int main(int argc, char *argv[])
     }
 
     coef = parcing(argv[1]);
+
 
     print_reduce(coef);
     if (print_order(coef))
