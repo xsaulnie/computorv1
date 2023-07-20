@@ -101,19 +101,42 @@ void get_coef(std::map<int, float> &coef, std::string eq, char sig)
 {
     int index;
     float value;
+    int pos = 0;
+    int expo;
 
     eq.erase(remove(eq.begin(), eq.end(), ' '), eq.end());
 
-    //std::string mess = std::string(eq.find('*'), eq.end());
+    if (eq[0] == '+' || eq[0] == '-')
+        pos = 1;
 
-    //index = atoi((eq[eq.find('*') + 3]));
-    //std::cout << eq << std::endl;
-    //std::cout << eq.substr(eq.find('*') + 3, eq.size()) << std::endl;
-    index = atoi(eq.substr(eq.find('*') + 3, eq.size()).c_str());
-    value = atof(eq.c_str());
+    if (eq[0 + pos] == 'X')
+    {
+        if (eq[0] == '-')
+            value = -1;
+        else
+            value = 1;
+    }
+    else
+    {
+        value = atof(eq.c_str());
+    }
 
-    // std::cout << "index " << index << std::endl;
-    // std::cout << "value " << value << std::endl; 
+
+    expo = eq.find('^');
+    if (expo != -1)
+    {
+        index = atoi(eq.substr(expo + 1, eq.size()).c_str());
+    }
+    else
+    {
+        if (eq.find('X') == (unsigned long)(-1))
+            index = 0;
+        else
+            index = 1;
+    }
+
+    std::cout << "monome : " << eq << " index " << index << " value " << value <<std::endl;
+
 
     if (sig == '+')
     {
@@ -207,7 +230,7 @@ bool remove_space(std::string &eq)
     std::string::iterator it = eq.begin();
     while (it != eq.end())
     {
-        if (*it == 'X')
+        if (*it == 'X' && *(it + 1) != ' ' && (it + 1) != eq.end())
         {
             if (*(it + 1) != '^')
                 return true;
@@ -222,6 +245,16 @@ bool remove_space(std::string &eq)
             if (it == eq.begin())
                 return true;
             if (!isdigit(*(it - 1)))
+                return true;
+        }
+
+        if (*it == '^')
+        {
+            if (!isdigit(*(it + 1)))
+                return true;
+            if (it == eq.begin())
+                return true;
+            if (*(it - 1) != 'X')
                 return true;
         }
         it++;
@@ -243,7 +276,7 @@ bool remove_space(std::string &eq)
     {
         if (*it == '+' || *it == '-' || *it == '=')
             {
-                if (!isdigit(*(it + 1)) || !isdigit(*(it - 1)))
+                if ((!isdigit(*(it + 1))  && *(it + 1) != 'X') || (!isdigit(*(it - 1)) && *(it - 1) != 'X'))
                     return true;
                 *it = '|';
             }
@@ -272,44 +305,52 @@ bool pointdigit(std::string::iterator &it, bool flag)
     return false;
 }
 
-// void exp(int num)
-// {
-//     std::cout << "error " << num << std::endl;
-// }
-
 bool check_monome(std::string eq)
 {
     std::string::iterator it = eq.begin();
+
+    std::cout << "syntax" << eq << std::endl;
+
     while (it != eq.end())
     {
-        //std::cout << *it << std::endl;
         if (pointdigit(it, true))
             return true;
-        //std::cout << *it << std::endl;
-        if (it == eq.end() || *it != '*')
-            return true;
-        else
-            it++;
-        //std::cout << *it << std::endl;
-        if (it == eq.end() || *it != 'X')
-            return true;
-        else
-            it++;
-        //std::cout << *it << std::endl;
-        if (it == eq.end() || *it != '^')
-            return true;
-        else
-            it++;
-        //std::cout << *it << std::endl;
-        if (pointdigit(it, false))
-            return true;
+
         if (it == eq.end())
             return false;
+        if ((*it != '*' && *it != '|' && *it != 'X'))
+            return true;
+
+        if (*it == '*' || *it == 'X')
+        {
+            if (*it == '*')
+            {
+                it++;
+                if (it == eq.end() || *it != 'X')
+                    return true;
+                else
+                    it++;
+            }
+            else
+                it++;
+            if (it == eq.end())
+                return false;
+            if ((*it != '^' && *it != '|'))
+                return true;
+            if (*it == '^')
+            {
+                it++;
+                if (pointdigit(it, false))
+                    return true;
+                if (it == eq.end())
+                    return false;
+            }
+        }
+        std::cout << *it << std::endl;
         if (*it != '|')
             return true;
         else
             it++;
-        //std::cout << *it << std::endl;
     }
     if (*(it - 1) == '|')
         return true;
@@ -333,9 +374,11 @@ bool check_syntax(std::string eq)
     }
 
     if (remove_space(eq))
+    {
+        std::cout << "space" << std::endl;
         return true;
+    }
 
-    std::cout << "syntax " << eq << std::endl;
 
     if (check_monome(eq))
     {
@@ -355,6 +398,8 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    std::cout << "computor bonus" << std::endl;
+
     if (check_syntax(argv[1]))
     {
         std::cout << "Incorrect equation" << std::endl;
@@ -363,7 +408,6 @@ int main(int argc, char *argv[])
 
     coef = parcing(argv[1]);
 
-
     print_reduce(coef);
     if (print_order(coef))
     {
@@ -371,5 +415,6 @@ int main(int argc, char *argv[])
         exit(1);
     }
     solver(coef);
+    std::cout << "exit" << std::endl;
     return 0;
 }

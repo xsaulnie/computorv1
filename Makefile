@@ -1,8 +1,14 @@
 SRCS	:=	main.cpp		\
 
+SRCB := main_bonus.cpp
+
 OBJS	=	${SRCS:.cpp=.o}
 
+OBJB	=	${SRCB:.cpp=.o}
+
 DEP		=	${SRCS:.cpp=.d}
+
+DEPB	= 	${SRCB:.cpp=.d}
 
 FLAGS	:=	-Wall -Wextra -Werror -g #-std=c++98
 
@@ -20,7 +26,9 @@ all:	dependencies ${NAME}
 
 clean:
 		rm -f ${OBJS}
+		rm -r ${OBJB}
 		rm -f ${DEP}
+		rm -f ${DEPB}
 
 fclean:		clean
 		rm -f ${NAME}
@@ -28,8 +36,14 @@ fclean:		clean
 ${NAME}: ${OBJS}
 		c++ ${FLAGS} -o ${NAME} ${OBJS}
 
+bonus: dependenciesb ${OBJB}
+	c++ ${FLAGS} -o ${NAME} ${OBJB}
+
 dependencies:
 include ${DEP}
+
+dependenciesb:
+include ${DEPB}
 
 re:		fclean all
 
