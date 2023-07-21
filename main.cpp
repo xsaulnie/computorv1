@@ -58,6 +58,12 @@ void solverorder2(std::map<int, float> &coef)
 
 void solver(std::map<int, float> &coef)
 {
+    if (coef.empty())
+    {
+        std::cout << "Any real number is a solution to this equation." << std::endl;
+        return;
+    }
+
     int deg = coef.rbegin()->first;
 
     switch (deg)
@@ -76,7 +82,12 @@ void solver(std::map<int, float> &coef)
 
 bool print_order(std::map<int, float> &coef)
 {
-    int deg = coef.rbegin()->first; 
+    int deg;
+
+    if (coef.empty())
+        deg = 0;
+    else
+        deg = coef.rbegin()->first;       
     std::cout << "Polynomial degree: " << deg << std::endl;
     if (deg >= 3)
         return true;
@@ -86,6 +97,12 @@ bool print_order(std::map<int, float> &coef)
 void print_reduce(std::map<int, float>&coef)
 {
     std::cout << "Reduced form: ";
+
+    if (coef.empty())
+    {
+        std::cout << "0 = 0" << std::endl;
+        return;
+    }
     std::map<int, float>::iterator it = coef.begin();
     std::cout << it->second << " * X^" << it->first;
     it++;
@@ -164,6 +181,30 @@ void get_coefs(std::map<int, float> &coef, std::string equation, char sig)
     get_coef(coef, std::string(it_cur, equation.end()), sig);
 }
 
+void remove_nulls(std::map<int, float> &coef)
+{
+    std::map<int, float>::iterator it = coef.begin();
+    std::vector<int> index_to_remove;
+
+    while (it != coef.end())
+    {
+        if (it->second == 0)
+        {
+            index_to_remove.push_back(it->first);
+        }
+        it++;
+    }
+
+    std::vector<int>::iterator it2 = index_to_remove.begin();
+
+    while (it2 != index_to_remove.end())
+    {
+        coef.erase(*it2);
+        std::cout << *it2 << "removed" << std::endl;
+        it2++;
+    }
+}
+
 std::map<int, float> parcing(std::string equation)
 {
     std::map<int, float> coef;
@@ -174,6 +215,8 @@ std::map<int, float> parcing(std::string equation)
 
     get_coefs(coef, equation.substr(0, equal), '+');
     get_coefs(coef, equation.substr(equal + 1), '-');
+
+    remove_nulls(coef);
 
     return coef;
 }
@@ -272,11 +315,6 @@ bool pointdigit(std::string::iterator &it, bool flag)
     return false;
 }
 
-// void exp(int num)
-// {
-//     std::cout << "error " << num << std::endl;
-// }
-
 bool check_monome(std::string eq)
 {
     std::string::iterator it = eq.begin();
@@ -357,7 +395,7 @@ int main(int argc, char *argv[])
 
     if (check_syntax(argv[1]))
     {
-        std::cout << "Incorrect equation" << std::endl;
+        std::cout << "Incorrect equation : Syntax error" << std::endl;
         exit(1);
     }
 

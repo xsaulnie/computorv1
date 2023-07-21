@@ -7,6 +7,35 @@
 #include <algorithm>
 #include <cmath>
 
+int pgcd(int a, int b)
+{
+    int r ;
+    if (b == 0)
+        return a;
+    r = a % b;
+    while (r != 0)
+    {
+        a = b;
+        b = r;
+        r = a % b;
+    }
+    return b; 
+}
+
+bool reductible(int &num, int &denum)
+{
+    int pg = pgcd(num, denum);
+    while (pg != 1)
+    {
+        num = num / pg;
+        denum = denum / pg;
+        pg = pgcd(num, denum);
+    }
+    if (num >= 100 || denum >= 100)
+        return true;
+    return false;
+}
+
 void solverorder0(std::map<int, float> &coef)
 {
     if (coef[0] == 0)
@@ -58,6 +87,12 @@ void solverorder2(std::map<int, float> &coef)
 
 void solver(std::map<int, float> &coef)
 {
+    if (coef.empty())
+    {
+        std::cout << "Any real number is a solution to this equation." << std::endl;
+        return;
+    }
+
     int deg = coef.rbegin()->first;
 
     switch (deg)
@@ -76,22 +111,58 @@ void solver(std::map<int, float> &coef)
 
 bool print_order(std::map<int, float> &coef)
 {
-    int deg = coef.rbegin()->first; 
+    int deg;
+
+    if (coef.empty())
+        deg = 0;
+    else
+        deg = coef.rbegin()->first;  
     std::cout << "Polynomial degree: " << deg << std::endl;
     if (deg >= 3)
         return true;
     return false;
 }
 
+void print_monome(std::map<int, float>::iterator it, bool abso)
+{
+    if (it->first == 0)
+    {
+        std::cout << ( abso ? abs(it->second) : it->second );
+    }
+    else if (it->first == 1)
+    {
+        if (abs(it->second) == 1)
+            std::cout << "X";
+        else
+            std::cout << ( abso ? abs(it->second) : it->second ) << " * X";
+    }
+    else
+    {
+        if (abs(it->second) == 1)
+            std::cout << "X^2";
+        else
+            std::cout << ( abso ? abs(it->second) : it->second ) << " * X^" << it->first;
+    }
+    return ;
+
+}
+
 void print_reduce(std::map<int, float>&coef)
 {
     std::cout << "Reduced form: ";
-    std::map<int, float>::iterator it = coef.begin();
-    std::cout << it->second << " * X^" << it->first;
-    it++;
-    while(it != coef.end())
+    if (coef.empty())
     {
-        std::cout << (it->second < 0 ? " - " : " + ") << abs(it->second) << " * X^" << it->first;
+        std::cout << "0 = 0" << std::endl;
+        return;
+    }
+
+    std::map<int, float>::iterator it = coef.begin();
+    print_monome(it, false);
+    it++;
+    while (it != coef.end())
+    {
+        std::cout << (it->second < 0 ? " - " : " + ");
+        print_monome(it, true);
         it++;
     }
     std::cout << " = 0" << std::endl;
@@ -136,7 +207,6 @@ void get_coef(std::map<int, float> &coef, std::string eq, char sig)
     }
 
     std::cout << "monome : " << eq << " index " << index << " value " << value <<std::endl;
-
 
     if (sig == '+')
     {
@@ -187,6 +257,30 @@ void get_coefs(std::map<int, float> &coef, std::string equation, char sig)
     get_coef(coef, std::string(it_cur, equation.end()), sig);
 }
 
+void remove_nulls(std::map<int, float> &coef)
+{
+    std::map<int, float>::iterator it = coef.begin();
+    std::vector<int> index_to_remove;
+
+    while (it != coef.end())
+    {
+        if (it->second == 0)
+        {
+            index_to_remove.push_back(it->first);
+        }
+        it++;
+    }
+
+    std::vector<int>::iterator it2 = index_to_remove.begin();
+
+    while (it2 != index_to_remove.end())
+    {
+        coef.erase(*it2);
+        std::cout << *it2 << "removed" << std::endl;
+        it2++;
+    }
+}
+
 std::map<int, float> parcing(std::string equation)
 {
     std::map<int, float> coef;
@@ -197,6 +291,8 @@ std::map<int, float> parcing(std::string equation)
 
     get_coefs(coef, equation.substr(0, equal), '+');
     get_coefs(coef, equation.substr(equal + 1), '-');
+
+    remove_nulls(coef);
 
     return coef;
 }
@@ -379,7 +475,6 @@ bool check_syntax(std::string eq)
         return true;
     }
 
-
     if (check_monome(eq))
     {
         return true;
@@ -398,11 +493,17 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
+    int num = 1326;
+    int denum = 546;
+    reductible(num, denum);
+    std::cout << num << denum << std::endl;
+    exit(0);
+
     std::cout << "computor bonus" << std::endl;
 
     if (check_syntax(argv[1]))
     {
-        std::cout << "Incorrect equation" << std::endl;
+        std::cout << "Incorrect equation : Syntax error" << std::endl;
         exit(1);
     }
 

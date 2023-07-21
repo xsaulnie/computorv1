@@ -10,7 +10,7 @@ DEP		=	${SRCS:.cpp=.d}
 
 DEPB	= 	${SRCB:.cpp=.d}
 
-FLAGS	:=	-Wall -Wextra -Werror -g #-std=c++98
+FLAGS	:=	-g -fsanitize=address -Wall -Wextra -Werror -g #-std=c++98
 
 NAME	:=	computor
 
@@ -25,10 +25,10 @@ NAME	:=	computor
 all:	dependencies ${NAME}
 
 clean:
-		rm -f ${OBJS}
-		rm -r ${OBJB}
-		rm -f ${DEP}
-		rm -f ${DEPB}
+		rm -rf ${OBJS}
+		rm -rf ${OBJB}
+		rm -rf ${DEP}
+		rm -rf ${DEPB}
 
 fclean:		clean
 		rm -f ${NAME}
