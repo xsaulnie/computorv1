@@ -44,15 +44,102 @@ void solverorder0(std::map<int, float> &coef)
         std::cout << "This equation has no solution."<< std::endl;
 }
 
+void print_fract(float num, float denum)
+{
+    int numi;
+    int denumi;
+
+    if (std::floor(num) != num || std::floor(denum) != denum || abs(denum) == 1)
+    {
+        std::cout << num / denum << std::endl;
+        return ;
+    }
+
+    numi = num;
+    denumi = denum;
+
+    //std::cout << numi << " " << denumi <<std::endl;
+
+    reductible(numi, denumi);
+
+    //std::cout << numi << " " << denumi << std::endl;
+
+    if (denumi == 1)
+    {
+        std::cout <<  num / denum << std::endl;
+        return ;
+    }
+
+    //std::cout << num << "|" << denum << std::endl;
+    if (num / denum < 0)
+        std::cout << "-";
+
+    std::cout << abs(numi) << '/' << abs(denumi) << std::endl;
+    return ;
+}
+
+void print_fract_i(float num, float denum, bool sig)
+{
+    int numi;
+    int denumi;
+
+    if (std::floor(num) != num || std::floor(denum) != denum || abs(denum) == 1)
+    {
+        std::cout << (sig ? num / denum : abs(num / denum));
+        return ;
+    }
+
+    numi = num;
+    denumi = denum;
+
+    reductible(numi, denumi);
+
+    if (denumi == 1)
+    {
+        std::cout << (sig ? num / denum : abs(num / denum));
+        return ;
+    }
+
+    if (num / denum < 0 && sig)
+        std::cout << "-";
+
+    std::cout << abs(numi) << '/' << abs(denumi);
+    return ;
+}
+
 void solverorder1(std::map<int, float> &coef)
 {
-    std::cout << "The solution is:" << std::endl;
+    std::cout << "The solution is :" << std::endl;
     if (coef.find(0) == coef.end() || coef[0] == 0)
     {
         std::cout << "0" << std::endl;
         return;
     }
-    std::cout << - coef[0] / coef[1] << std::endl;
+    print_fract(- 1 * coef[0], coef[1]);
+}
+
+void canonical(std::map<int, float> &coef)
+{
+    float beta = - ( (coef[1] * coef[1] - (4 * coef[2] * coef[0]))  / (4 * coef[2]));
+    float alpha = - (coef[1] / (2 * coef[2]));
+    std::cout << "Canonical form: ";
+    
+    if (coef[2] != 1)
+        std::cout << coef[2] << " * ";
+    std::cout << "(X";
+    if (alpha != 0)
+    {
+        std::cout << (alpha > 0 ? " - " : " + ");
+        print_fract_i(abs(coef[1]), abs( 2 * coef[2]), false);
+    }
+    if (beta == 0)
+    {
+        std::cout << ")^2 = 0" << std::endl;
+        return ;
+    }
+    std::cout << ")^2" << (beta < 0 ? " - " : " + " );
+    print_fract_i(abs(coef[1] * coef[1] - (4 * coef[2] * coef[0])), abs(4 * coef[2]), false);
+    std::cout << " = 0"<< std::endl;
 }
 
 void solverorder2(std::map<int, float> &coef)
@@ -63,27 +150,44 @@ void solverorder2(std::map<int, float> &coef)
         coef[0] = 0;
     if (coef.find(1) == coef.end())
         coef[1] = 0;
+
+    canonical(coef);
+
     delta = (coef[1] * coef[1]) - (4 * coef[2] * coef[0]);
-    //std::cout << "delta" << delta << std::endl;
+    std::cout << "From reduce form : a := " << coef[2] << " b := " << coef[1] << " c := " << coef[0] << std::endl;
+    std::cout << "Discriminant computation : delta = b^2 - (4 * a * c)" << std::endl;
+    std::cout << "delta = " << coef[1] << " * ^2 - (4 * " << coef[2] << " * " << coef[0] << ")" << std::endl;
+    std::cout << "delta = " << delta << std::endl;
 
     if (delta > 0 )
     {
         std::cout << "Discriminant is strictly positive, the two solutions are:" << std::endl;
-        std::cout << (-coef[1] - sqrt(delta)) / (2 * coef[2]) << std::endl;
-        std::cout << (-coef[1] + sqrt(delta)) / (2 * coef[2]) << std::endl;
+        print_fract(-coef[1] - sqrt(delta), 2 * coef[2]);
+        print_fract(-coef[1] + sqrt(delta), 2 * coef[2]);
+        //std::cout << (-coef[1] - sqrt(delta)) / (2 * coef[2]) << std::endl;
+        //std::cout << (-coef[1] + sqrt(delta)) / (2 * coef[2]) << std::endl;
     }
     else if (delta == 0)
     {
-        std::cout << "Discriminant is null, the double solution is:" << std::endl;
-        std::cout << (-coef[1]) / (2 * coef[2]) << std::endl;
+        std::cout << "Discriminant is strictly null, the double solution is:" << std::endl;
+        print_fract(-coef[1], 2 * coef[2]);
+        //std::cout << (-coef[1]) / (2 * coef[2]) << std::endl;
     }
     else
     {
         std::cout << "Discriminant is stricly negative, the two conjugate complex solutions are:" << std::endl;
-        std::cout << (-coef[1]) / (2 * coef[2]) << (coef[2] < 0 ? " + " : " - ") << abs(sqrt(-delta) / (2 * coef[2])) << "*i"<< std::endl;
-        std::cout << (-coef[1]) / (2 * coef[2]) << (coef[2] < 0 ? " - " : " + ") << abs(sqrt(-delta) / (2 * coef[2])) << "*i"<< std::endl;
+        print_fract_i(-coef[1], 2 * coef[2], true);
+        std::cout << (coef[2] < 0 ? " + " : " - ");
+        print_fract_i(abs(sqrt(-delta)), abs(2 * coef[2]), false);
+        std::cout << "*i"<< std::endl;
+        print_fract_i(-coef[1], 2 * coef[2], true); 
+        std::cout << (coef[2] < 0 ? " - " : " + ");
+        print_fract_i(abs(sqrt(-delta)), abs(2 * coef[2]), false);
+        std::cout << "*i" << std::endl;
     }
 }
+
+
 
 void solver(std::map<int, float> &coef)
 {
@@ -191,7 +295,6 @@ void get_coef(std::map<int, float> &coef, std::string eq, char sig)
     {
         value = atof(eq.c_str());
     }
-
 
     expo = eq.find('^');
     if (expo != -1)
@@ -493,11 +596,11 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    int num = 1326;
-    int denum = 546;
-    reductible(num, denum);
-    std::cout << num << denum << std::endl;
-    exit(0);
+    // int num = 1326;
+    // int denum = 546;
+    // reductible(num, denum);
+    // std::cout << num << denum << std::endl;
+    // exit(0);
 
     std::cout << "computor bonus" << std::endl;
 
