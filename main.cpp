@@ -35,7 +35,6 @@ void solverorder2(std::map<int, float> &coef)
     if (coef.find(1) == coef.end())
         coef[1] = 0;
     delta = (coef[1] * coef[1]) - (4 * coef[2] * coef[0]);
-    //std::cout << "delta" << delta << std::endl;
 
     if (delta > 0 )
     {
@@ -121,16 +120,8 @@ void get_coef(std::map<int, float> &coef, std::string eq, char sig)
 
     eq.erase(remove(eq.begin(), eq.end(), ' '), eq.end());
 
-    //std::string mess = std::string(eq.find('*'), eq.end());
-
-    //index = atoi((eq[eq.find('*') + 3]));
-    //std::cout << eq << std::endl;
-    //std::cout << eq.substr(eq.find('*') + 3, eq.size()) << std::endl;
     index = atoi(eq.substr(eq.find('*') + 3, eq.size()).c_str());
     value = atof(eq.c_str());
-
-    // std::cout << "index " << index << std::endl;
-    // std::cout << "value " << value << std::endl; 
 
     if (sig == '+')
     {
@@ -200,7 +191,6 @@ void remove_nulls(std::map<int, float> &coef)
     while (it2 != index_to_remove.end())
     {
         coef.erase(*it2);
-        std::cout << *it2 << "removed" << std::endl;
         it2++;
     }
 }
@@ -226,7 +216,6 @@ bool incorrect_car(char c)
     std::vector<char> cor{'=', '+', '-', 'X', '^', ' ', '*', '.'};
     if (!isdigit(c) && std::find(cor.begin(), cor.end(), c ) == cor.end())
     {
-        //std::cout << "c " << c << " first " << !isdigit(c) <<  " second " << (std::find(cor.begin(), cor.end(), c ) == cor.end()) << std::endl;
         return true;
     }
     return false;
@@ -320,25 +309,20 @@ bool check_monome(std::string eq)
     std::string::iterator it = eq.begin();
     while (it != eq.end())
     {
-        //std::cout << *it << std::endl;
         if (pointdigit(it, true))
             return true;
-        //std::cout << *it << std::endl;
         if (it == eq.end() || *it != '*')
             return true;
         else
             it++;
-        //std::cout << *it << std::endl;
         if (it == eq.end() || *it != 'X')
             return true;
         else
             it++;
-        //std::cout << *it << std::endl;
         if (it == eq.end() || *it != '^')
             return true;
         else
             it++;
-        //std::cout << *it << std::endl;
         if (pointdigit(it, false))
             return true;
         if (it == eq.end())
@@ -347,7 +331,6 @@ bool check_monome(std::string eq)
             return true;
         else
             it++;
-        //std::cout << *it << std::endl;
     }
     if (*(it - 1) == '|')
         return true;
@@ -372,8 +355,6 @@ bool check_syntax(std::string eq)
 
     if (remove_space(eq))
         return true;
-
-    std::cout << "syntax " << eq << std::endl;
 
     if (check_monome(eq))
     {
@@ -400,7 +381,6 @@ int main(int argc, char *argv[])
     }
 
     coef = parcing(argv[1]);
-
 
     print_reduce(coef);
     if (print_order(coef))

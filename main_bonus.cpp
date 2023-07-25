@@ -60,11 +60,7 @@ void print_fract(float num, float denum)
     numi = num;
     denumi = denum;
 
-    //std::cout << numi << " " << denumi <<std::endl;
-
     reductible(numi, denumi);
-
-    //std::cout << numi << " " << denumi << std::endl;
 
     if (denumi == 1)
     {
@@ -72,7 +68,6 @@ void print_fract(float num, float denum)
         return ;
     }
 
-    //std::cout << num << "|" << denum << std::endl;
     if (num / denum < 0)
         std::cout << "-";
 
@@ -164,27 +159,30 @@ void solverorder2(std::map<int, float> &coef)
     if (delta > 0 )
     {
         std::cout << "Discriminant is strictly positive, the two solutions are:" << std::endl;
+        std::cout << "x1 = (-b - sqrt(delta)) / 2 * a, x1 = ";
         print_fract(-coef[1] - sqrt(delta), 2 * coef[2]);
+        std::cout << "x2 = (-b + sqrt(delta)) / 2 * a), x2 = ";
         print_fract(-coef[1] + sqrt(delta), 2 * coef[2]);
 
-       
-        //std::cout << (-coef[1] - sqrt(delta)) / (2 * coef[2]) << std::endl;
-        //std::cout << (-coef[1] + sqrt(delta)) / (2 * coef[2]) << std::endl;
     }
     else if (delta == 0)
     {
         std::cout << "Discriminant is strictly null, the double solution is:" << std::endl;
+        std::cout << "x = -b / 2 * a, x = ";
         print_fract(-coef[1], 2 * coef[2]);
-        //std::cout << (-coef[1]) / (2 * coef[2]) << std::endl;
     }
     else
     {
         std::cout << "Discriminant is stricly negative, the two conjugate complex solutions are:" << std::endl;
-        print_fract_i(-coef[1], 2 * coef[2], true);
+        std::cout << "z1 = (-b / 2 * a) - (sqrt(-delta) / 2 * a) * i, z1 = ";
+        if (coef[1] != 0)
+            print_fract_i(-coef[1], 2 * coef[2], true);
         std::cout << (coef[2] < 0 ? " + " : " - ");
         print_fract_i(abs(sqrt(-delta)), abs(2 * coef[2]), false);
         std::cout << "*i"<< std::endl;
-        print_fract_i(-coef[1], 2 * coef[2], true); 
+        std::cout << "z2 = (-b / 2 * a) + (sqrt(-delta) / 2 * a) * i, z2 = ";
+        if (coef[1] != 0)
+            print_fract_i(-coef[1], 2 * coef[2], true); 
         std::cout << (coef[2] < 0 ? " - " : " + ");
         print_fract_i(abs(sqrt(-delta)), abs(2 * coef[2]), false);
         std::cout << "*i" << std::endl;
@@ -194,11 +192,10 @@ void solverorder2(std::map<int, float> &coef)
 
 void factorized(float b, float a, float delta)
 {
+    if (delta < 0)
+        return ;
     float x1 = ((-b - sqrt(delta)) / 2 * a);
     float x2 = ((-b + sqrt(delta)) / 2 * a);
-
-    std::cout << "one" << x1 << std::endl;
-    std::cout << "two" << x2 << std::endl; 
 
     std::cout << "Factorized form : ";
     if (delta > 0)
@@ -343,7 +340,7 @@ void get_coef(std::map<int, float> &coef, std::string eq, char sig)
             index = 1;
     }
 
-    std::cout << "monome : " << eq << " index " << index << " value " << value <<std::endl;
+    //std::cout << "monome : " << eq << " index " << index << " value " << value <<std::endl;
 
     if (sig == '+')
     {
@@ -413,7 +410,6 @@ void remove_nulls(std::map<int, float> &coef)
     while (it2 != index_to_remove.end())
     {
         coef.erase(*it2);
-        std::cout << *it2 << "removed" << std::endl;
         it2++;
     }
 }
@@ -439,7 +435,6 @@ bool incorrect_car(char c)
     std::vector<char> cor{'=', '+', '-', 'X', '^', ' ', '*', '.'};
     if (!isdigit(c) && std::find(cor.begin(), cor.end(), c ) == cor.end())
     {
-        //std::cout << "c " << c << " first " << !isdigit(c) <<  " second " << (std::find(cor.begin(), cor.end(), c ) == cor.end()) << std::endl;
         return true;
     }
     return false;
@@ -542,7 +537,7 @@ bool check_monome(std::string eq)
 {
     std::string::iterator it = eq.begin();
 
-    std::cout << "syntax" << eq << std::endl;
+    //std::cout << "syntax" << eq << std::endl;
 
     while (it != eq.end())
     {
@@ -579,7 +574,6 @@ bool check_monome(std::string eq)
                     return false;
             }
         }
-        std::cout << *it << std::endl;
         if (*it != '|')
             return true;
         else
@@ -608,7 +602,6 @@ bool check_syntax(std::string eq)
 
     if (remove_space(eq))
     {
-        std::cout << "space" << std::endl;
         return true;
     }
 
@@ -630,14 +623,6 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    // int num = 1326;
-    // int denum = 546;
-    // reductible(num, denum);
-    // std::cout << num << denum << std::endl;
-    // exit(0);
-
-    std::cout << "computor bonus" << std::endl;
-
     if (check_syntax(argv[1]))
     {
         std::cout << "Incorrect equation : Syntax error" << std::endl;
@@ -653,6 +638,5 @@ int main(int argc, char *argv[])
         exit(1);
     }
     solver(coef);
-    std::cout << "exit" << std::endl;
     return 0;
 }
