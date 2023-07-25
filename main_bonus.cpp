@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <cmath>
 
+void factorized(float b, float a, float delta);
+
 int pgcd(int a, int b)
 {
     int r ;
@@ -154,9 +156,9 @@ void solverorder2(std::map<int, float> &coef)
     canonical(coef);
 
     delta = (coef[1] * coef[1]) - (4 * coef[2] * coef[0]);
-    std::cout << "From reduce form : a := " << coef[2] << " b := " << coef[1] << " c := " << coef[0] << std::endl;
+    std::cout << "Identification: a := " << coef[2] << " b := " << coef[1] << " c := " << coef[0] << std::endl;
     std::cout << "Discriminant computation : delta = b^2 - (4 * a * c)" << std::endl;
-    std::cout << "delta = " << coef[1] << " * ^2 - (4 * " << coef[2] << " * " << coef[0] << ")" << std::endl;
+    std::cout << "delta = " << coef[1] << "^2 - (4 * " << coef[2] << " * " << coef[0] << ")" << std::endl;
     std::cout << "delta = " << delta << std::endl;
 
     if (delta > 0 )
@@ -164,6 +166,8 @@ void solverorder2(std::map<int, float> &coef)
         std::cout << "Discriminant is strictly positive, the two solutions are:" << std::endl;
         print_fract(-coef[1] - sqrt(delta), 2 * coef[2]);
         print_fract(-coef[1] + sqrt(delta), 2 * coef[2]);
+
+       
         //std::cout << (-coef[1] - sqrt(delta)) / (2 * coef[2]) << std::endl;
         //std::cout << (-coef[1] + sqrt(delta)) / (2 * coef[2]) << std::endl;
     }
@@ -185,6 +189,36 @@ void solverorder2(std::map<int, float> &coef)
         print_fract_i(abs(sqrt(-delta)), abs(2 * coef[2]), false);
         std::cout << "*i" << std::endl;
     }
+    factorized(coef[1], coef[2], delta);
+}
+
+void factorized(float b, float a, float delta)
+{
+    float x1 = ((-b - sqrt(delta)) / 2 * a);
+    float x2 = ((-b + sqrt(delta)) / 2 * a);
+
+    std::cout << "one" << x1 << std::endl;
+    std::cout << "two" << x2 << std::endl; 
+
+    std::cout << "Factorized form : ";
+    if (delta > 0)
+    {
+        std::cout << a << "(X";
+        std::cout << (x1 >= 0 ? " - " : " + ");
+        print_fract_i(abs(-b - sqrt(delta)), abs(2 * a), false);
+        std::cout << ")(X";
+        std::cout << (x2 >= 0 ? " - " : " + ");
+        print_fract_i(abs(-b + sqrt(delta)), abs(2 * a), false);
+        std::cout << ")" << std::endl;
+    }
+
+    if (delta == 0)
+    {
+        std::cout << a << "(X";
+        std::cout << (x1 >= 0 ? " - " : " + ");
+        print_fract_i(abs(-b), abs(2 * a), false);
+        std::cout << ")^2" << std::endl;
+    }  
 }
 
 
